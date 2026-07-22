@@ -28,6 +28,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
       - name: Générer le fichier ICS depuis le CSV
         run: python3 generate_ics.py reunion_events.csv events.ics
 

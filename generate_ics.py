@@ -4,6 +4,11 @@
 Chaque ligne du CSV devient un événement « toute la journée » (VALUE=DATE).
 Le fuseau horaire est fixé à Indian/Reunion (UTC+4, sans heure d'été).
 
+La sérialisation iCalendar est déléguée à la bibliothèque Python
+`icalendar` : elle prend en charge l'échappement des valeurs TEXT, le
+pliage des lignes à 75 octets et la structure des composants, conformément
+à la RFC 5545 — plutôt que d'assembler le format à la main.
+
 Usage :
     python3 generate_ics.py [source.csv] [sortie.ics]
 """
@@ -16,38 +21,12 @@ from datetime import date, datetime, timedelta, timezone
 from hashlib import sha1
 from pathlib import Path
 
+from icalendar import Calendar, Event, Timezone, TimezoneStandard
+
 TIMEZONE = "Indian/Reunion"
 # La Réunion est à UTC+04:00 toute l'année (pas de changement d'heure).
-UTC_OFFSET = "+0400"
+UTC_OFFSET = timedelta(hours=4)
 PRODID = "-//reunion-events//Agenda La Reunion//FR"
-
-
-def fold(line: str) -> str:
-    """Replie une ligne à 75 octets, comme l'exige la RFC 5545 (section 3.1)."""
-    raw = line.encode("utf-8")
-    if len(raw) <= 75:
-        return line
-    chunks = []
-    while raw:
-        # Ne pas couper au milieu d'un caractère multi-octets.
-        cut = 75
-        while cut > 0 and (raw[cut] & 0xC0) == 0x80:
-            cut -= 1
-        chunks.append(raw[:cut])
-        raw = raw[cut:]
-        if raw:
-            raw = b" " + raw  # espace de continuation en début de ligne pliée
-    return "\r\n".join(c.decode("utf-8") for c in chunks)
-
-
-def escape_text(value: str) -> str:
-    """Échappe les caractères réservés d'une valeur TEXT (RFC 5545, section 3.3.11)."""
-    return (
-        value.replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\n", "\\n")
-    )
 
 
 def parse_date(value: str) -> date | None:
@@ -76,10 +55,14 @@ def make_uid(row: dict[str, str]) -> str:
     return f"{digest}@reunion-events"
 
 
-def build_event(row: dict[str, str], stamp: str) -> list[str] | None:
+def build_event(row: dict[str, str], stamp: datetime) -> Event | None:
     start = parse_date(row.get("date_debut", ""))
     if start is None:
         return None  # une date de début valide est obligatoire
+
+    summary = (row.get("nom", "") or "").strip()
+    if not summary:
+        return None
 
     end = parse_date(row.get("date_fin", "")) or start
     if end < start:
@@ -87,75 +70,60 @@ def build_event(row: dict[str, str], stamp: str) -> list[str] | None:
     # DTEND est exclusif pour un événement « toute la journée » : +1 jour.
     dtend = end + timedelta(days=1)
 
-    summary = (row.get("nom", "") or "").strip()
-    if not summary:
-        return None
-
-    description_parts = []
-    if (row.get("categorie", "") or "").strip():
-        description_parts.append(row["categorie"].strip())
+    categorie = (row.get("categorie", "") or "").strip()
     lien = (row.get("lien", "") or "").strip()
-    if lien:
-        description_parts.append(lien)
+    description_parts = [p for p in (categorie, lien) if p]
 
-    lines = [
-        "BEGIN:VEVENT",
-        f"UID:{make_uid(row)}",
-        f"DTSTAMP:{stamp}",
-        f"DTSTART;VALUE=DATE:{start:%Y%m%d}",
-        f"DTEND;VALUE=DATE:{dtend:%Y%m%d}",
-        f"SUMMARY:{escape_text(summary)}",
-    ]
+    event = Event()
+    event.add("uid", make_uid(row))
+    event.add("dtstamp", stamp)
+    # Passer un objet `date` (et non `datetime`) produit VALUE=DATE.
+    event.add("dtstart", start)
+    event.add("dtend", dtend)
+    event.add("summary", summary)
 
     location = communes_label(row.get("communes", ""))
     if location:
-        lines.append(f"LOCATION:{escape_text(location)}")
-    if (row.get("categorie", "") or "").strip():
-        lines.append(f"CATEGORIES:{escape_text(row['categorie'].strip())}")
+        event.add("location", location)
+    if categorie:
+        event.add("categories", [categorie])
     if description_parts:
-        lines.append(f"DESCRIPTION:{escape_text(' — '.join(description_parts))}")
+        event.add("description", " — ".join(description_parts))
     if lien:
-        lines.append(f"URL:{escape_text(lien)}")
-
-    lines.append(f"X-WR-TIMEZONE:{TIMEZONE}")
-    lines.append("TRANSP:TRANSPARENT")
-    lines.append("END:VEVENT")
-    return lines
+        event.add("url", lien)
+    event.add("transp", "TRANSPARENT")
+    return event
 
 
-def vtimezone() -> list[str]:
+def build_vtimezone() -> Timezone:
     """VTIMEZONE minimal pour Indian/Reunion (UTC+4 fixe, sans DST)."""
-    return [
-        "BEGIN:VTIMEZONE",
-        f"TZID:{TIMEZONE}",
-        "BEGIN:STANDARD",
-        "DTSTART:19700101T000000",
-        f"TZOFFSETFROM:{UTC_OFFSET}",
-        f"TZOFFSETTO:{UTC_OFFSET}",
-        "TZNAME:+04",
-        "END:STANDARD",
-        "END:VTIMEZONE",
-    ]
+    tz = Timezone()
+    tz.add("tzid", TIMEZONE)
+    standard = TimezoneStandard()
+    standard.add("dtstart", datetime(1970, 1, 1, 0, 0, 0))
+    standard.add("tzoffsetfrom", UTC_OFFSET)
+    standard.add("tzoffsetto", UTC_OFFSET)
+    standard.add("tzname", "+04")
+    tz.add_component(standard)
+    return tz
 
 
-def build_calendar(rows: list[dict[str, str]]) -> str:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    lines = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        f"PRODID:{PRODID}",
-        "CALSCALE:GREGORIAN",
-        "METHOD:PUBLISH",
-        "X-WR-CALNAME:Événements de La Réunion",
-        f"X-WR-TIMEZONE:{TIMEZONE}",
-    ]
-    lines += vtimezone()
+def build_calendar(rows: list[dict[str, str]]) -> Calendar:
+    stamp = datetime.now(timezone.utc)
+    cal = Calendar()
+    cal.add("version", "2.0")
+    cal.add("prodid", PRODID)
+    cal.add("calscale", "GREGORIAN")
+    cal.add("method", "PUBLISH")
+    cal.add("x-wr-calname", "Événements de La Réunion")
+    cal.add("x-wr-timezone", TIMEZONE)
+    cal.add_component(build_vtimezone())
+
     for row in rows:
         event = build_event(row, stamp)
-        if event:
-            lines += event
-    lines.append("END:VCALENDAR")
-    return "\r\n".join(fold(line) for line in lines) + "\r\n"
+        if event is not None:
+            cal.add_component(event)
+    return cal
 
 
 def main(argv: list[str]) -> int:
@@ -165,10 +133,10 @@ def main(argv: list[str]) -> int:
     with src.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
 
-    calendar = build_calendar(rows)
-    dst.write_text(calendar, encoding="utf-8")
+    cal = build_calendar(rows)
+    dst.write_bytes(cal.to_ical())
 
-    count = calendar.count("BEGIN:VEVENT")
+    count = sum(1 for component in cal.walk("VEVENT"))
     print(f"{count} événement(s) écrit(s) dans {dst}")
     return 0
 
