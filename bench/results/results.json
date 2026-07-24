@@ -1,0 +1,290 @@
+{
+  "generatedAt": "2026-07-24T18:39:51.577Z",
+  "fileSizeBytes": 10485760,
+  "archiveName": "basemap.pmtiles",
+  "config": {
+    "coldReps": 7,
+    "warmReps": 9,
+    "sliceReads": 600
+  },
+  "runs": {
+    "loopback": {
+      "profile": {
+        "key": "loopback",
+        "label": "Raw loopback",
+        "bytesPerSec": 0
+      },
+      "persistentStorageGranted": false,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+      "config": {
+        "url": "http://127.0.0.1:46731/basemap.pmtiles",
+        "name": "basemap.pmtiles",
+        "fileSize": 10485760,
+        "coldReps": 7,
+        "warmReps": 9,
+        "sliceReads": 600
+      },
+      "results": [
+        {
+          "key": "fetch",
+          "label": "Plain fetch (no cache)",
+          "backing": "network",
+          "cold": {
+            "n": 7,
+            "min": 15.5,
+            "median": 17.899999999906868,
+            "p95": 20.800000000046566,
+            "max": 25.5,
+            "mean": 19.185714285720938
+          },
+          "warm": {
+            "n": 9,
+            "min": 12.5,
+            "median": 15.899999999906868,
+            "p95": 25.4000000001397,
+            "max": 28.399999999906868,
+            "mean": 17.74444444443927
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.2999999998137355,
+            "median": 0.6000000000931323,
+            "p95": 1.2999999998137355,
+            "max": 3,
+            "mean": 0.7095000000010866
+          },
+          "sliceThroughputMBs": 37.03974864922681
+        },
+        {
+          "key": "indexeddb",
+          "label": "IndexedDB blob cache",
+          "backing": "memory",
+          "cold": {
+            "n": 7,
+            "min": 71.70000000018626,
+            "median": 94.9000000001397,
+            "p95": 100.10000000009313,
+            "max": 110.80000000004657,
+            "mean": 92.37142857147514
+          },
+          "warm": {
+            "n": 9,
+            "min": 0.6999999999534339,
+            "median": 0.8000000000465661,
+            "p95": 1,
+            "max": 1.1999999999534339,
+            "mean": 0.8777777777932998
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.39999999990686774,
+            "median": 1,
+            "p95": 1.6000000000931323,
+            "max": 4.300000000046566,
+            "mean": 1.0135000000009313
+          },
+          "sliceThroughputMBs": 24.103326755445703
+        },
+        {
+          "key": "cachestorage",
+          "label": "Cache Storage API",
+          "backing": "memory",
+          "cold": {
+            "n": 7,
+            "min": 101.0999999998603,
+            "median": 169.60000000009313,
+            "p95": 194.30000000004657,
+            "max": 279.5,
+            "mean": 169.22857142855148
+          },
+          "warm": {
+            "n": 9,
+            "min": 0.8999999999068677,
+            "median": 1.0999999998603016,
+            "p95": 1.1999999999534339,
+            "max": 1.1999999999534339,
+            "mean": 1.0444444444340963
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.39999999990686774,
+            "median": 0.6000000000931323,
+            "p95": 0.8999999999068677,
+            "max": 2.199999999953434,
+            "mean": 0.6553333333332557
+          },
+          "sliceThroughputMBs": 40.619956765009896
+        },
+        {
+          "key": "opfs",
+          "label": "OPFS (streamed to disk)",
+          "backing": "disk",
+          "cold": {
+            "n": 7,
+            "min": 79.29999999981374,
+            "median": 103.5,
+            "p95": 288.69999999995343,
+            "max": 340.39999999990687,
+            "mean": 161.41428571423916
+          },
+          "warm": {
+            "n": 9,
+            "min": 1.3000000000465661,
+            "median": 2,
+            "p95": 3.6000000000931323,
+            "max": 4.099999999860302,
+            "mean": 2.200000000005174
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.5,
+            "median": 0.8999999999068677,
+            "p95": 1.3999999999068677,
+            "max": 8.5,
+            "mean": 0.956166666666201
+          },
+          "sliceThroughputMBs": 27.445825344269945
+        }
+      ]
+    },
+    "40mbit": {
+      "profile": {
+        "key": "40mbit",
+        "label": "~40 Mbit/s throttle",
+        "bytesPerSec": 5000000
+      },
+      "persistentStorageGranted": false,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+      "config": {
+        "url": "http://127.0.0.1:46731/basemap.pmtiles",
+        "name": "basemap.pmtiles",
+        "fileSize": 10485760,
+        "coldReps": 7,
+        "warmReps": 9,
+        "sliceReads": 600
+      },
+      "results": [
+        {
+          "key": "fetch",
+          "label": "Plain fetch (no cache)",
+          "backing": "network",
+          "cold": {
+            "n": 7,
+            "min": 2102.9000000001397,
+            "median": 2110.8000000000466,
+            "p95": 2116.5,
+            "max": 2119.399999999907,
+            "mean": 2110.3571428571427
+          },
+          "warm": {
+            "n": 9,
+            "min": 2110.100000000093,
+            "median": 2139.9000000001397,
+            "p95": 2166.5,
+            "max": 2202.5,
+            "mean": 2140.811111111116
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.2999999998137355,
+            "median": 0.5,
+            "p95": 0.7999999998137355,
+            "max": 4,
+            "mean": 0.5486666666681412
+          },
+          "sliceThroughputMBs": 48.575747265969085
+        },
+        {
+          "key": "indexeddb",
+          "label": "IndexedDB blob cache",
+          "backing": "memory",
+          "cold": {
+            "n": 7,
+            "min": 2102,
+            "median": 2106.5,
+            "p95": 2140.5,
+            "max": 2177.100000000093,
+            "mean": 2122.6714285714884
+          },
+          "warm": {
+            "n": 9,
+            "min": 0.5999999998603016,
+            "median": 0.8000000000465661,
+            "p95": 0.9000000001396984,
+            "max": 1,
+            "mean": 0.7888888888992369
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.2999999998137355,
+            "median": 0.5,
+            "p95": 0.6999999999534339,
+            "max": 18.800000000046566,
+            "mean": 0.5536666666669771
+          },
+          "sliceThroughputMBs": 46.8496929560243
+        },
+        {
+          "key": "cachestorage",
+          "label": "Cache Storage API",
+          "backing": "memory",
+          "cold": {
+            "n": 7,
+            "min": 2121.5,
+            "median": 2146.5,
+            "p95": 2166.1999999999534,
+            "max": 2176.9000000001397,
+            "mean": 2147.1571428571892
+          },
+          "warm": {
+            "n": 9,
+            "min": 1.0999999998603016,
+            "median": 1.1999999999534339,
+            "p95": 1.5,
+            "max": 1.6999999999534339,
+            "mean": 1.2555555555607296
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.39999999990686774,
+            "median": 0.6999999999534339,
+            "p95": 1.1000000000931323,
+            "max": 17.800000000046566,
+            "mean": 0.7790000000006209
+          },
+          "sliceThroughputMBs": 33.086792896849964
+        },
+        {
+          "key": "opfs",
+          "label": "OPFS (streamed to disk)",
+          "backing": "disk",
+          "cold": {
+            "n": 7,
+            "min": 2094.7000000001863,
+            "median": 2104.100000000093,
+            "p95": 2104.7999999998137,
+            "max": 2131.5,
+            "mean": 2105.9000000000065
+          },
+          "warm": {
+            "n": 9,
+            "min": 0.8000000000465661,
+            "median": 1.0999999998603016,
+            "p95": 1.3000000000465661,
+            "max": 1.9000000001396984,
+            "mean": 1.1333333333540294
+          },
+          "slice": {
+            "n": 600,
+            "min": 0.5,
+            "median": 0.8000000000465661,
+            "p95": 1.1000000000931323,
+            "max": 7.199999999953434,
+            "mean": 0.849999999999612
+          },
+          "sliceThroughputMBs": 31.06143725491614
+        }
+      ]
+    }
+  }
+}

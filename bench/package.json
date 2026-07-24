@@ -1,0 +1,11 @@
+{
+  "name": "pmtiles-loader-bench",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "dependencies": {
+    "esbuild": "^0.24.2",
+    "playwright-core": "^1.61.1",
+    "pmtiles": "^3.2.1"
+  }
+}
